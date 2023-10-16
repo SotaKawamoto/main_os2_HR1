@@ -77,7 +77,8 @@ void sendstatus(){
 void flightpinDriver(){
 
     if(flightPin == 1){
-        im920.printf("TXDA flightPinDriverworked");
+        im920.printf("TXDA flightPinDriverworked\r\n");
+        im920.printf("\r\n");
         flightpin.detach();
         solenoid.attach(solenoid_on,3.6);
         //フライトピンは発射検知か、、で3.6秒はロケットが頂点に達しているだろう、かつ、センサが反応しきれていない時のバックアップ頂点検知として働いている。
@@ -97,6 +98,8 @@ void flightpinDriver(){
 
 void solenoid_on(){
     Solenoid = 1;
+        im920.printf("TXDA solenoidworked\r\n");
+        im920.printf("\r\n");
     wait_us(5000000);//5秒間電圧ソレノイドにかける。これ何秒間くらい電圧かけて良い？？
     Solenoid = 0;
     solenoid.detach();
@@ -104,7 +107,9 @@ void solenoid_on(){
 }
 
 void buzzer_on(){
-    while(1){
+    while(1){        
+        im920.printf("TXDA Buzzerworked\r\n");
+        im920.printf("\r\n");
         Buzzer = 1;
     }
 }
