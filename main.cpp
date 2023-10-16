@@ -1,8 +1,8 @@
 //mbed-os-6
 #include "mbed.h"
 
-Serial pc(USBTX,USBRX);//main - pc USB
-Serial im920(PA_9,PA_10);//main im - PC im//mainのUart tx,rxピンにつなぐ
+Serial pc(USBTX,USBRX,9600);//main - pc USB
+Serial im920(PA_9,PA_10,19200);//main im - PC im//mainのUart tx,rxピンにつなぐ
 //https://forums.mbed.com/t/no-member-named-printf-in-mbed-bufferserial/13574 
 
 Ticker status;
@@ -10,20 +10,16 @@ Ticker flightpin;
 char str[1000];
 
 int getmode();
-void sendstatus(int x);
+void sendstatus();
+
+ //設定//
+
+    int mode = 0;
+
+///////
 
 int main()
 {
-
-    //設定//
-    pc.set_baud(9600);
-    pc.set_format(8,Serial::None,1);
-    
-    im920.set_baud(9600);
-    im920.set_format(8,Serial::None,1);
-
-    int mode = 0;
-    ///////
 
     wait_us(5000000);//5秒
     status.attach(sendstatus,5);//これちゃんと5秒毎になってる？
@@ -33,17 +29,15 @@ int main()
     //ループさせて、pcと送受信し続ける?受信？送受信？
     while(1){
         int temp = getmode();
-        //modeが0から変わればmodeを変更する
-
         if(temp != 0){//modeが0から変わればmodeを変更し、modeをPC側に送信する
             mode = temp;
-            sendstatus(mode);
+            sendstatus();
         }
     }
 
 }
 
-int germode(){
+int getmode(){
 
     char temp;
     int i;
@@ -64,7 +58,7 @@ int germode(){
     return 0;//0モードへの変更指示
 }
 
-void sendstatus(int x){
-    im920.printf("TXDA %d",x);
+void sendstatus(){
+    im920.printf("TXDA %d",mode);
     im920.printf("\r\n");
 }
