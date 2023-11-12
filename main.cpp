@@ -1,4 +1,4 @@
-//mbed-os-6
+//mbed-os-2
 #include "mbed.h"
 
 Serial pc(USBTX,USBRX,9600);//main - pc USB
@@ -20,21 +20,23 @@ void sendstatus();
 
 int main()
 {
-
+    im920.printf("TXDA  開始\r\n");
     wait_us(5000000);//5秒
+    im920.printf("TXDA  5秒経過\r\n");
     status.attach(sendstatus,5);//これちゃんと5秒毎になってる？
+    im920.printf("TXDA  ロケットの状態送信開始\r\n");
 
     //センサの割込み..一定時間ごとにの設定
 
     //ループさせて、pcと送受信し続ける?受信？送受信？
     while(1){
         int temp = getmode();
-        if(temp != 0){//modeが0から変わればmodeを変更し、modeをPC側に送信する
+        im920.printf("TXDA %d\r\n",temp);
+        if(temp != 0){//mode変更のコマンドが送られるとmodeを変更し、現在のmodeをPC側に送信する ex)送信側で01のモード１を打ち込むとgetmode関数からreturn 1が返ってきてmodeを送り返す
             mode = temp;
             sendstatus();
         }
     }
-
 }
 
 int getmode(){
@@ -50,6 +52,7 @@ int getmode(){
             i++;
 
             if((str[i-2]==0)&&(str[i-1]==1)){
+                im920.printf("TXDA モードが01に変更されました\r\n");
                 return 1;//1モードへ変更の指示
             }
         }
@@ -59,6 +62,6 @@ int getmode(){
 }
 
 void sendstatus(){
-    im920.printf("TXDA %d",mode);
+    im920.printf("TXDA　モードが変更されました mode = %d",mode);
     im920.printf("\r\n");
 }
