@@ -1,5 +1,6 @@
 //mbed-os-2
 #include "mbed.h"
+#include "getGPS.h"
 
 Serial pc(USBTX,USBRX,9600);//main - pc USB
 Serial im920(PA_9,PA_10,19200);//main im - PC im//mainのUart tx,rxピンにつなぐ
@@ -18,7 +19,7 @@ DigitalOut solenoid(PB_6);
 DigitalOut buzzer(PB_1);
 DigitalIn flightPin(PA_12);
 DigitalOut debbag(PB_5);
-AnalogOut imRST(PA_1);
+//AnalogOut imRST(PA_1);これをつけると動かなくなった
 
 int temp1;
 char temp2;
@@ -32,6 +33,7 @@ void sendstatus();
 void FlightPinDriver();
 void solenoid_ON();
 void buzzerON();
+void getgps();
 
 int main()
 {
@@ -65,7 +67,7 @@ int getmode(){
                 temp2=im920.getc();
                 if(str1[0] != str2[0] || str1[1] != str2[1]){ //二桁コマンド用なので変更の余地あり   
 
-                    if((str1[i-2]==0)&&(str1[i-1]==1)){
+                    if((str1[12]==0)&&(str1[13]==1)){
                         im920.printf("TXDA モードが01に変更されました\r\n");
                         return 1;//1モードへ変更の指示
                     }
@@ -99,7 +101,8 @@ void solenoid_ON()
     //M2S = 1;
     //S2M = 1;
     solenoid=1;//開放！！
-    wait(1.0);//ソレノイドをプルする時間//限界は知らない
+    im920.printf("TXDA solenoidworked\r\n");
+    wait(4.0);//ソレノイドをプルする時間//限界は知らない
     solenoid=0;
     t.detach();
     t.attach(buzzerON,60);//ブザー作動までの時間/
@@ -111,4 +114,20 @@ void buzzerON()
     //M2S = 0;
     //S2M = 1;
     buzzer=1;//buzzer発振
+    t.detach();
+    t.attach(getgps,4);
 }
+
+
+void getgps()
+{
+    GPS gps(PA_2, PA_3);
+    im920.printf("TXDA GPS Start\r\n");
+    /* 1秒ごとに現在地を取得してターミナル出力 */
+    if(gps.getgps()){ //現在地取得
+        printf("TXDA (%lf, %lf)\r\n", gps.latitude, gps.longitude);//緯度と経度を出力
+    }
+    else{
+        printf("TXDA No data\r\n");//データ取得に失敗した場合
+    }
+} 
