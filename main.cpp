@@ -7,20 +7,21 @@ Serial im920(PA_9,PA_10,19200);//main im - PC im//mainのUart tx,rxピンにつ�
 
 Ticker status;
 Ticker launch;
-Ticher t;
+Ticker t;
 
-DigitalOut M2S_1(PA_2);
-DigitalOut M2S_2(PA_3);
+DigitalOut M2S(PA_2);
+DigitalOut S2M(PA_3);
 
-DigitalOut cameraPow(PA_11);
-DigitalOut cameraRec(PA_8);
-DigitalOut solenoid(PF_0);
-DigitalOut buzzer(PF_1);
+DigitalOut cameraPow(PA_8);
+DigitalOut cameraRec(PA_11);
+DigitalOut solenoid(PB_6);
+DigitalOut buzzer(PB_1);
 DigitalIn flightPin(PA_12);
+
 
 int temp1;
 char temp2;
-char str[100];
+char str1[100];
 char str2[100];
 int a;
 int mode = 0;
@@ -55,8 +56,8 @@ int main()
 
 int getmode(){
         if(im920.readable()){
-            i=0
-            temp = im920.getc();
+            int i=0;
+            temp2 = im920.getc();
             while(temp2 != '\r'){
                 str1[i] = temp2;
                 i++;
@@ -68,8 +69,8 @@ int getmode(){
                         return 1;//1モードへ変更の指示
                     }
 
-                    str2[0] = str[0];
-                    str2[1] = str[1];//2度目のモード変更通知を防ぐ
+                    str2[0] = str1[0];
+                    str2[1] = str1[1];//2度目のモード変更通知を防ぐ
 
                 }            
             }
@@ -84,8 +85,8 @@ void sendstatus(){
 void FlightPinDriver()
 {
     if(flightPin==1) {
-        //M2S_1 = 1; マイコン同士の通信
-        //M2S_2 = 0;     
+        //M2S = 1; マイコン同士の通信
+        //S2M = 0;     
         im920.printf("TXDA flightworked\r\n");
         launch.detach();
         t.attach(solenoid_ON,3.6);//ソレノイドを動かすまでの時間、十分頂点時間？センサ？
@@ -94,8 +95,8 @@ void FlightPinDriver()
 
 void solenoid_ON()
 {
-    //M2S_1 = 1;
-    //M2S_2 = 1;
+    //M2S = 1;
+    //S2M = 1;
     solenoid=1;//開放！！
     wait(1.0);//ソレノイドをプルする時間//限界は知らない
     solenoid=0;
@@ -106,7 +107,7 @@ void solenoid_ON()
 void buzzerON()
 {
     im920.printf("TXDA buzzer ON\n\r");
-    //M2S_1 = 0;
-    //M2S_2 = 1;
+    //M2S = 0;
+    //S2M = 1;
     buzzer=1;//buzzer発振
 }
