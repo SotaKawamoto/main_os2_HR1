@@ -17,7 +17,8 @@ DigitalOut cameraRec(PA_11);
 DigitalOut solenoid(PB_6);
 DigitalOut buzzer(PB_1);
 DigitalIn flightPin(PA_12);
-
+DigitalOut debbag(PB_5);
+AnalogOut imRST(PA_1);
 
 int temp1;
 char temp2;
